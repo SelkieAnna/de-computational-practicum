@@ -1,11 +1,14 @@
 import math
 
 class Approximator:
+    '''
+        This class implements three numerical methods for computing FODE IVP.
+    '''
 
-    def function(self, x, y):
-        return math.cos(x) - y
+    def __init__(self, fun):
+        self.function = fun
 
-    def euler(self, x0, y0, xmax, n):
+    def euler(self, x0, y0, xmax, n, function):
         h = (xmax - x) / n
         x = [x0]
         y = [y0]
@@ -14,7 +17,7 @@ class Approximator:
             y.append(y[i - 1] + (h * function(x[i - 1], y[i - 1])))
         return x, y
 
-    def improved_euler(self, parameter_list):
+    def improved_euler(self, x0, y0, xmax, n, function):
         h = (xmax - x) / n
         x = [x0]
         y = [y0]
@@ -24,7 +27,7 @@ class Approximator:
             y.append(y[i - 1] + dy)
         return x, y
 
-    def runge_kutta(self, parameter_list):
+    def runge_kutta(self, x0, y0, xmax, n, function):
         h = (xmax - x) / n
         x = [x0]
         y = [y0]
