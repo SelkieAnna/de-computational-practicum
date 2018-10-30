@@ -7,6 +7,7 @@ def main():
 
     head = Label(window, text = "This application is designed to plot the equation y' = cos(x) - y.")
     note = Label(window, text = "All graph tabs must be closed in order for the main window to work correctly.")
+    lbl_inp_gr = Label(window, text = "Input for the graphs:")
     inp = Frame(window)
     xz = Frame(inp)
     xzl = Label(xz, text = "x0")
@@ -20,14 +21,19 @@ def main():
     nu = Frame(inp)
     nul = Label(nu, text = "n")
     nui = Entry(nu)
-    buttn = Frame(window)
-    bttn_ex = Button(buttn, text = "Plot the exact solution graph")
-    bttn_eu = Button(buttn, text = "Plot using Euler method")
-    bttn_ie = Button(buttn, text = "Plot using Improved Euler method")
-    bttn_rk = Button(buttn, text = "Plot using Runge-Kutta method")
+    lbl_inp_err = Label(window, text = "Input for the total error:")
+    inp_err = Frame(window)
+    nz = Frame(inp_err)
+    nzl = Label(nz, text = "n0")
+    nzi = Entry(nz)
+    nm = Frame(inp_err)
+    nml = Label(nm, text = "n max")
+    nmi = Entry(nm)
+    bttn = Button(window, text = "Plot")
 
     head.pack()
     note.pack()
+    lbl_inp_gr.pack()
     xzl.pack(side = LEFT)
     xzi.pack(side = RIGHT)
     xz.pack()
@@ -40,25 +46,26 @@ def main():
     nul.pack(side = LEFT)
     nui.pack(side = RIGHT)
     nu.pack()
-    inp.pack(side = LEFT)
-    bttn_ex.pack()
-    bttn_eu.pack()
-    bttn_ie.pack()
-    bttn_rk.pack()
-    buttn.pack(side = RIGHT)
+    inp.pack()
+    lbl_inp_err.pack()
+    nzl.pack(side = LEFT)
+    nzi.pack(side = RIGHT)
+    nz.pack()
+    nml.pack(side = LEFT)
+    nmi.pack(side = RIGHT)
+    nm.pack()
+    inp_err.pack()
+    bttn.pack()
 
-    plot = plotter.Plotter(lambda x, c: math.exp(-2 * x) * (math.sin(x) - math.cos(x)) * 0.5 + c,
-                            lambda x0, y0: math.exp(-2 * x0) * (math.cos(x0) - math.sin(x0)) * 0.5 + y0,
+    plot = plotter.Plotter(lambda x, c: (math.sin(x) + math.cos(x)) * 0.5 + c * math.exp(-x),
+                            lambda x0, y0: math.exp(x0) * ((math.cos(x0) + math.sin(x0)) * 0.5),
                             lambda x, y: math.cos(x) - y)
 
-    bttn_ex.configure(command = lambda: execute_ex(plot, xzi, yzi, xmi, nui))
-    bttn_eu.configure(command = lambda: execute_eu(plot, xzi, yzi, xmi, nui))
-    bttn_ie.configure(command = lambda: execute_ie(plot, xzi, yzi, xmi, nui))
-    bttn_rk.configure(command = lambda: execute_rk(plot, xzi, yzi, xmi, nui))
+    bttn.configure(command = lambda: execute(plot, xzi, yzi, xmi, nui, nzi, nmi))
 
     window.mainloop()
 
-def execute_ex(plot, xzi, yzi, xmi, nui):
+def execute(plot, xzi, yzi, xmi, nui, nzi, nmi):
     try:
         x0 = float(xzi.get())
         y0 = float(yzi.get())
@@ -66,45 +73,15 @@ def execute_ex(plot, xzi, yzi, xmi, nui):
         n = int(nui.get())
     except ValueError:
         print("Wrong input")
-        pass
     else:
-        plot.plot_exact(x0, y0, xmax, n)
-
-def execute_eu(plot, xzi, yzi, xmi, nui):
-    try:
-        x0 = float(xzi.get())
-        y0 = float(yzi.get())
-        xmax = float(xmi.get())
-        n = int(nui.get())
-    except ValueError:
-        print("Wrong input")
-        pass
-    else:
-        plot.plot_euler(x0, y0, xmax, n)
-
-def execute_ie(plot, xzi, yzi, xmi, nui):
-    try:
-        x0 = float(xzi.get())
-        y0 = float(yzi.get())
-        xmax = float(xmi.get())
-        n = int(nui.get())
-    except ValueError:
-        print("Wrong input")
-        pass
-    else:
-        plot.plot_improved_euler(x0, y0, xmax, n)
-
-def execute_rk(plot, xzi, yzi, xmi, nui):
-    try:
-        x0 = float(xzi.get())
-        y0 = float(yzi.get())
-        xmax = float(xmi.get())
-        n = int(nui.get())
-    except ValueError:
-        print("Wrong input")
-        pass
-    else:
-        plot.plot_runge_kutta(x0, y0, xmax, n)
+        try:
+            n0 = int(nzi.get())
+            nmax = int(nmi.get())
+        except ValueError:
+            n0 = None
+            nmax = None
+        finally:
+            plot.plot(x0, y0, xmax, n, n0, nmax)
 
 
 if __name__ == '__main__':

@@ -3,8 +3,6 @@ import error_calculator
 import matplotlib
 matplotlib.use("TkAgg")
 from matplotlib import pyplot as plt
-
-# 
 import math
 
 class Plotter:
@@ -18,8 +16,7 @@ class Plotter:
         self.const = constant
         self.function = fun
 
-    # 
-    def plot_exact(self, x0, y0, xmax , n):
+    def exact_graph(self, x0, y0, xmax , n):
         c = self.const(x0, y0)
         h = (xmax - x0) / n
         x = [x0]
@@ -27,58 +24,48 @@ class Plotter:
         for i in range(1, n + 1):
             x.append(x0 + (i * h))
             y.append(self.exact(x[i], c))
-        plt.figure()
-        plt.plot(x, y)
-        plt.title('The Exact Solution Plot')
-        plt.show()
+        return x, y
 
-    def plot_euler(self, x0, y0, xmax, n):
+    def plot(self, x0, y0, xmax, n, n0, nmax):
         appr = approximator.Approximator(self.function)
-        graph = appr.euler(x0, y0, xmax, n)
         calc = error_calculator.Error_calculator()
-        gl_err = calc.calculate_global(self.exact, self.const, graph[0], graph[1])
+
+        graph_exact = self.exact_graph(x0, y0, xmax, n)
+        graph_euler = appr.euler(x0, y0, xmax, n)
+        graph_improvedeuler = appr.improved_euler(x0, y0, xmax, n)
+        graph_rungekutta = appr.runge_kutta(x0, y0, xmax, n)
+
+        localerror_euler = calc.calculate_local(self.exact, self.const, *graph_euler)
+        localerror_improvedeuler = calc.calculate_local(self.exact, self.const, *graph_improvedeuler)
+        localerror_rungekutta = calc.calculate_local(self.exact, self.const, *graph_rungekutta)
+
+        if (n0 and nmax and n):
+            globalerror_euler = calc.calculate_total(self.exact, self.const, appr.euler, x0, y0, xmax, n0, nmax)
+            globalerror_improvedeuler = calc.calculate_total(self.exact, self.const, appr.improved_euler, x0, y0, xmax, n0, nmax)
+            globalerror_rungecutta = calc.calculate_total(self.exact, self.const, appr.runge_kutta, x0, y0, xmax, n0, nmax)
+
         plt.figure()
+
         plt.subplot(2, 2, 1)
-        plt.plot(graph[0], graph[1])
-        plt.title('Euler Method Plot')
+        plt.plot(*graph_euler, label = "Euler")
+        plt.plot(*graph_improvedeuler, label = "Improved Euler")
+        plt.plot(*graph_rungekutta, label = "Runge-Kutta")
+        plt.plot(*graph_exact, label = "Exact")
+        plt.title('Function & its approximations')
+        plt.legend(loc=9, bbox_to_anchor=(0.5, -0.1))
+
         plt.subplot(2, 2, 2)
-        plt.plot(gl_err[0], gl_err[1])
-        plt.title('Global Error')
+        plt.plot(*localerror_euler, label = "Euler")
+        plt.plot(*localerror_improvedeuler, label = "Improved Euler")
+        plt.plot(*localerror_rungekutta, label = "Runge-Kutta")
+        plt.title('Local Errors')
+
+        if (n0 and nmax):
+            plt.subplot(2, 2, 4)
+            plt.plot(*globalerror_euler, label = "Euler")
+            plt.plot(*globalerror_improvedeuler, label = "Improved Euler")
+            plt.plot(*globalerror_rungecutta, label = "Runge-Kutta")
+            plt.ylabel('max error for a number of glid cells n')
+            plt.title('Total Errors')
+
         plt.show()
-
-    def plot_improved_euler(self, x0, y0, xmax, n):
-        appr = approximator.Approximator(self.function)
-        graph = appr.improved_euler(x0, y0, xmax, n)
-        calc = error_calculator.Error_calculator()
-        gl_err = calc.calculate_global(self.exact, self.const, graph[0], graph[1])
-        plt.figure()
-        plt.subplot(2, 2, 1)
-        plt.plot(graph[0], graph[1])
-        plt.title('Improved Euler Method Plot')
-        plt.subplot(2, 2, 2)
-        plt.plot(gl_err[0], gl_err[1])
-        plt.title('Global Error')
-        plt.show()
-
-    def plot_runge_kutta(self, x0, y0, xmax, n):
-        appr = approximator.Approximator(self.function)
-        graph = appr.runge_kutta(x0, y0, xmax, n)
-        calc = error_calculator.Error_calculator()
-        gl_err = calc.calculate_global(self.exact, self.const, graph[0], graph[1])
-        plt.figure()
-        plt.subplot(2, 2, 1)
-        plt.plot(graph[0], graph[1])
-        plt.title('Runge-Kutta  Method Plot')
-        plt.subplot(2, 2, 2)
-        plt.plot(gl_err[0], gl_err[1])
-        plt.title('Global Error')
-        plt.show()
-
-    def plot_euler_err(self, parameter_list):
-        pass
-
-    def plot_improved_euler_err(self, parameter_list):
-        pass
-
-    def plot_runge_kutta_err(self, parameter_list):
-        pass
